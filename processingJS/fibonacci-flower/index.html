@@ -1,0 +1,36 @@
+<!doctype html>
+<html><!-- InstanceBegin template="/Templates/processingJS.dwt" codeOutsideHTMLIsLocked="false" -->
+
+<head>
+  <meta charset="utf-8">
+  <!-- InstanceBeginEditable name="doctitle" -->
+  <title>Fibonacci Flower made by TG WEBCODING</title>
+  <!-- InstanceEndEditable -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    canvas {
+      height: 100%;
+    }
+
+  </style>
+  <!-- InstanceParam name="data-processing-sources" type="text" value="emitter.pde" -->
+</head>
+
+<body>
+  <canvas id="canvas" data-processing-sources="fibonacci-flower.pde"></canvas>
+  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+  <script src="./processing.js"></script>
+  <script>
+    $(window).on('load resize', function(){
+      $('#canvas').width($(window).height() * 3 / 4);
+    });
+  </script>
+</body>
+
+<!-- InstanceEnd --></html>

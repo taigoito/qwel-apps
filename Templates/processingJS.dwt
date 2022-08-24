@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <!-- TemplateBeginEditable name="doctitle" -->
+  <title>Processing JS Apps made by TG WEBCODING</title>
+  <!-- TemplateEndEditable -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    canvas {
+      height: 100%;
+    }
+
+  </style>
+  <!-- TemplateParam name="data-processing-sources" type="text" value="sketch.pde" -->
+</head>
+
+<body>
+  <canvas id="canvas" data-processing-sources="@@(_document['data-processing-sources'])@@"></canvas>
+  <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+  <script src="../processingJS/practice-particles/processing.js"></script>
+  <script>
+    $(window).on('load resize', function(){
+      $('#canvas').width($(window).height() * 3 / 4);
+    });
+  </script>
+</body>
+
+</html>

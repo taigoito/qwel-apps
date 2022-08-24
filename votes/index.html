@@ -1,0 +1,336 @@
+<!doctype html>
+<html><!-- InstanceBegin template="/Templates/master.dwt" codeOutsideHTMLIsLocked="false" -->
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- InstanceBeginEditable name="doctitle" -->
+  <title>Vote - JS Apps made by TG WEBCODING</title>
+  <!-- InstanceEndEditable -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.css">
+  <link rel="stylesheet" href="../style.css">
+  <!-- InstanceBeginEditable name="head" -->
+  <!-- InstanceEndEditable -->
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-140782462-1', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+</head>
+
+<body>
+  <noscript>
+    <p class="no-support">このWebページはJavaScriptを有効にすることで正常に動作します。
+      <br>JavaScriptを有効にして再度ご来訪ください。</p>
+  </noscript>
+  <!-- InstanceBeginEditable name="body" -->
+  <div class="container my-5">
+    <h1>投票パターン分析</h1>
+    <p>JS Apps made by TG WEBCODING</p>
+    <div id="menu">
+      <button id="add-btn" class="btn btn-primary" type="button">候補者追加</button>
+      <button id="math1-btn" class="btn btn-success" type="button">計算（同票一位あり）</button>
+      <button id="math2-btn" class="btn btn-warning" type="button">計算（同票一位なし）</button>
+      <p class="my-2"><small>注意!! 候補者数を7名以上で計算すると、プログラムが停止する恐れがあります。</small></p>
+    </div>
+    <table id="input-table" class="table"></table>
+    <table id="output-table1" class="table table-hover"></table>
+    <table id="output-table2" class="table table-hover"></table>
+  </div>
+  <!-- InstanceEndEditable -->
+  <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+  <!-- InstanceBeginEditable name="foot" -->
+  <script src="../js/underscore.js"></script>
+  <script>
+    /*var testData = [
+      [0, 1, 1, 0],
+      [1, 0, 1, 0],
+      [1, 1, 0, 1],
+      [0, 1, 0, 0]
+    ];*/
+
+    var Vote = function (count) {
+      this.inputData = [];
+      this.$inputTable = $("#input-table");
+      this.$addBtn = $("#add-btn");
+      this.$mathBtn1 = $("#math1-btn");
+      this.$mathBtn2 = $("#math2-btn");
+      this.count = count;
+      this.initialize();
+    };
+
+    Vote.prototype = {
+      initialize: function () {
+        this.createInputTable(this.count);
+        this.handleEvents();
+      },
+
+      createInputTable: function (count) {
+        var $thead = $("<thead>");
+        var $tbody = $("<tbody>");
+        var $tr = $("<tr>");
+        var $th = $("<th>");
+
+        $tr.append($th.html("候補者"));
+        for (var i = 0; i < count; i++) {
+          $th = $("<th>");
+          var id = i + 1
+          $tr.append($th.text(id + " サン"));
+        }
+        this.$inputTable.append($thead.append($tr));
+
+        for (var i = 0; i < count; i++) {
+          $tr = $("<tr>");
+          $th = $("<th>");
+          var id = i + 1
+          $tr.append($th.text(id + " サンの投票相手"));
+          for (var j = 0; j < count; j++) {
+            var check = (i === j) ? "" : " checked=\"checked\"";
+            var $btn = $("<input id=\"" + i + "_" + j + "\"type=\"checkbox\"" + check + ">")
+            var $td = $("<td>").append($btn);
+            $tr.append($td.html($btn));
+          }
+          $tbody.append($tr);
+        }
+        this.$inputTable.append($tbody);
+      },
+
+      addPerson: function () {
+        var $thead = this.$inputTable.find("thead");
+        var $tbody = this.$inputTable.find("tbody");
+        var $tr = $thead.find("tr");
+        var $th = $("<th>");
+        var id = this.count + 1
+        $tr.append($th.text(id + " サン"));
+        for (var i = 0; i < this.count; i++) {
+          var $btn = $("<input id=\"" + i + "_" + this.count + "\"type=\"checkbox\" checked=\"checked\">")
+          var $td = $("<td>").append($btn);
+          $tr = $tbody.find("tr:eq(" + i + ")");
+          $tr.append($td.html($btn));
+        }
+        $tr = $("<tr>");
+        $th = $("<th>");
+        $tr.append($th.text(id + " サンの投票相手"));
+        for (var i = 0; i <= this.count; i++) {
+          var check = (i === this.count) ? "" : " checked=\"checked\"";
+          var $btn = $("<input id=\"" + this.count + "_" + i + "\"type=\"checkbox\"" + check + ">")
+          var $td = $("<td>").append($btn);
+          $tr.append($td.html($btn));
+        }
+        $tbody.append($tr);
+        this.count++;
+      },
+
+      math1: function () {
+        this.insertData();
+        this.insertSelectionArr();
+        this.setAllPatternCounts();
+        this.insertVotesArr();
+        this.insertResult(this.countWinning(true), true);
+      },
+
+      math2: function () {
+        this.insertData();
+        this.insertSelectionArr();
+        this.setAllPatternCounts();
+        this.insertVotesArr();
+        this.insertResult(this.countWinning(false), false);
+      },
+
+      insertData: function () {
+        this.inputData = [];
+        for (var i = 0; i < this.count; i++) {
+          this.inputData[i] = [];
+          for (var j = 0; j < this.count; j++) {
+            this.inputData[i][j] = this.getCheckValue(i, j);
+          }
+        }
+      },
+
+      getCheckValue: function (i, j) {
+        //return testData[i][j];
+        return ($("#" + i + "_" + j).prop("checked")) ? 1 : 0;
+      },
+
+      insertSelectionArr: function () {
+        var len = this.count;
+        var resultArr = [];
+        for (var i = 0; i < len; i++) {
+          resultArr[i] = [];
+          for (var j = 0; j < len; j++) {
+            if (this.inputData[i][j] === 1) {
+              resultArr[i].push(j);
+            }
+          }
+        }
+        this.selectionArr = resultArr;
+      },
+
+      setAllPatternCounts: function () {
+        var len = this.selectionArr.length;
+        var result = 1;
+        for (var i = 0; i < len; i++) {
+          result *= this.selectionArr[i].length;
+        }
+        this.allPatternCounts = result;
+      },
+
+      insertVotesArr: function () {
+        var len1 = this.count;
+        var len2 = this.selectionArr.length;
+        var len3 = 0;
+        var lenProduct = 1;
+        var resultArr = [];
+        for (var i = 0; i < len1; i++) {
+          len3 = this.selectionArr[i].length;
+          lenProduct *= len3;
+          resultArr[i] = [];
+          for (var j = 0; j < this.allPatternCounts; j++) {
+            resultArr[i][j] = this.selectionArr[i][(Math.floor(j / (this.allPatternCounts / lenProduct))) % len3];
+          }
+        }
+        this.votes = resultArr;
+      },
+
+      countWinners: function (num, bool) {
+        var len = this.count;
+        var counts = [];
+        for (var i = 0; i < len; i++) {
+          counts[i] = 0;
+        }
+        for (var i = 0; i < len; i++) {
+          counts[this.votes[i][num]]++
+        }
+        var maxCount = counts[0];
+        var winners = [];
+        winners.push(0);
+        for (var i = 1; i < len; i++) {
+          if (maxCount < counts[i]) {
+            maxCount = counts[i];
+            winners = [];
+            winners.push(i);
+          } else if (maxCount === counts[i]) {
+            if (bool) {
+              winners.push(i);
+            }
+            else {
+              winners = [];
+            }
+          }
+        }
+        return winners;
+      },
+
+      countWinning: function (bool) {
+        var len1 = this.count;
+        var winningArr = []
+        for (var i = 0; i < len1; i++) {
+          winningArr[i] = 0;
+          for (var j = 0; j < this.allPatternCounts; j++) {
+            var winners = this.countWinners(j, bool);
+            var len2 = winners.length;
+            for (var k = 0; k < len2; k++) {
+              if (i === winners[k]) {
+                winningArr[i]++;
+              }
+            }
+          }
+        }
+        return winningArr;
+      },
+
+      insertResult: function (arr, bool) {
+        var count = this.count;
+        var retry = this.allPatternCounts;
+        var $thead = $("<thead>");
+        var $tbody = $("<tbody>");
+        var $tr = $("<tr>");
+        var $th = $("<th>");
+
+        if (bool) {
+          var $outputTable = $("#output-table1");
+          $outputTable.empty();
+          $outputTable.append($("<caption>").text("同票一位あり"));
+        } else {
+          var $outputTable = $("#output-table2");
+          $outputTable.empty();
+          $outputTable.append($("<caption>").text("同票一位なし"))
+        }
+
+        $tr.append($th.html("候補者"));
+        for (var i = 0; i < count; i++) {
+          $th = $("<th>");
+          var id = i + 1
+          $tr.append($th.text(id + " サン"));
+        }
+        $th = $("<th>");
+        if (bool === false) {
+          $tr.append($th.text("決選投票"));
+          $th = $("<th>");
+        }
+        $tr.append($th.text("総数"));
+        $outputTable.append($thead.append($tr));
+
+        var $tr1 = $("<tr>");
+        var $th1 = $("<th>");
+        var $td = $("<td>");
+        $tr1.append($th1.text("パターン数"));
+        for (var i = 0; i < count; i++) {
+          var txt = arr[i] + "通り"
+          retry -= arr[i]
+          $td = $("<td>").text(txt);
+          $tr1.append($td);
+        }
+        $td = $("<td>");
+        if (bool === false) {
+          $tr1.append($td.text(retry + "通り"));
+        }
+        $td = $("<td>").text(this.allPatternCounts + "通り");
+        $tr1.append($td);
+        $tbody.append($tr1);
+        $outputTable.append($tbody);
+
+        var $tr2 = $("<tr>");
+        var $th2 = $("<th>");
+        var $td = $("<td>");
+        $tr2.append($th2.text("当選率"));
+        for (var i = 0; i < count; i++) {
+          var txt = (Math.round(arr[i] / this.allPatternCounts * 10000) / 100) + "%"
+          $td = $("<td>").text(txt);
+          $tr2.append($td);
+        }
+        $td = $("<td>");
+        if (bool === false) {
+          $tr2.append($td.text((Math.round(retry / this.allPatternCounts * 10000) / 100) + "%"));
+        }
+        $td = $("<td>").text("100%");
+        $tr2.append($td);
+        $tbody.append($tr2);
+        $outputTable.append($tbody);
+      },
+
+      handleEvents: function () {
+        var self = this;
+        this.$addBtn.on("click", function () {
+          self.addPerson();
+        });
+        this.$mathBtn1.on("click", function () {
+          self.math1();
+        });
+        this.$mathBtn2.on("click", function () {
+          self.math2();
+        });
+      }
+    };
+
+    var vote = new Vote(3);
+  </script>
+  <!-- InstanceEndEditable -->
+</body>
+
+<!-- InstanceEnd --></html>

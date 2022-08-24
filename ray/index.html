@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ray Simulator - QWEL DESIGN</title>
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(#004848, #000000);
+      color: #ffffff;
+    }
+
+    .container {
+      width: 320px;
+      margin: auto;
+    }
+
+    #canvas {
+      width: 320px;
+      height: 320px;
+    }
+    
+    @media (min-width: 481px) {
+      .container {
+        width: 480px;
+      }
+
+      #canvas {
+        width: 480px;
+        height: 480px;
+      }
+    }
+    
+    @media (min-width: 768px) {
+      .container {
+        width: 600px;
+      }
+
+      #canvas {
+        width: 600px;
+        height: 600px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Ray Simulator</h1>
+    <p>JS Apps made by QWEL DESIGN</p>
+    <canvas id="canvas" width="600" height="600"></canvas>
+  </div>
+  <script src="./init.js" type="module"></script>
+</body>
+
+</html>

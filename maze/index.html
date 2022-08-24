@@ -1,0 +1,285 @@
+<!doctype html>
+<html><!-- InstanceBegin template="/Templates/master.dwt" codeOutsideHTMLIsLocked="false" -->
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- InstanceBeginEditable name="doctitle" -->
+  <title>Maze - JS Apps made by TG WEBCODING</title>
+  <!-- InstanceEndEditable -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.css">
+  <link rel="stylesheet" href="../style.css">
+  <!-- InstanceBeginEditable name="head" -->
+  <!-- InstanceEndEditable -->
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-140782462-1', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+</head>
+
+<body>
+  <noscript>
+    <p class="no-support">このWebページはJavaScriptを有効にすることで正常に動作します。
+      <br>JavaScriptを有効にして再度ご来訪ください。</p>
+  </noscript>
+  <!-- InstanceBeginEditable name="body" -->
+  <div class="container my-5">
+    <h1 class="d-print-none">Maze</h1>
+    <p class="d-print-none">JS Apps made by TG WEBCODING</p>
+    <ul id="menu" class="list-inline d-print-none">
+      <li class="list-inline-item"><button data-level="1" class="btn btn-primary" type="button">Level 1</button></li>
+      <li class="list-inline-item"><button data-level="2" class="btn btn-info" type="button">Level 2</button></li>
+      <li class="list-inline-item"><button data-level="3" class="btn btn-success" type="button">Level 3</button></li>
+      <li class="list-inline-item"><button data-level="4" class="btn btn-warning" type="button">Level 4</button></li>
+      <li class="list-inline-item"><button data-level="5" class="btn btn-danger" type="button">Level 5</button></li>
+    </ul>
+    <canvas id="maze" width="728" height="968"></canvas>
+  </div>
+  <!-- InstanceEndEditable -->
+  <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+  <!-- InstanceBeginEditable name="foot" -->
+  <script>
+    var SIZE = 8, WIDTH = 91 * SIZE, HEIGHT = 121 * SIZE;
+
+    $('#menu').click('.btn', function(el){
+      var $target = $(el.target),
+        level = $target.data('level');
+      init(level);
+    });
+
+    init(1);
+
+    function init (level) {
+      chaoticMaze (3, 4, 3, 3, level, level, SIZE);
+    }
+    
+    function chaoticMaze (w1, h1, w2, h2, w3, h3, lineWidth) {
+      var maze = {},
+        upperLayerMaze = {},
+        upperLayerMazes = {},
+        lowerLayerMaze = [],
+        lowerLayerMazes = [],
+        lowerLayerMass = [];
+
+      // 階層迷路群を生成
+      for (var y = 0; y < h1; y++) {
+        lowerLayerMaze[y] = [];
+        lowerLayerMazes[y] = [];
+        lowerLayerMass[y] = [];
+        for (var x = 0; x < w1; x++) {
+          lowerLayerMaze[y][x] = createMazeObj(w2, h2);
+          lowerLayerMazes[y][x] = createMazesObj(w2, h2, w3, h3);
+          lowerLayerMass[y][x] = createHierarchicalMaze(lowerLayerMaze[y][x], lowerLayerMazes[y][x]);
+        }
+      }
+
+      // 階層迷路群からさらに階層迷路を生成
+      upperLayerMaze = createMazeObj(w1, h1);
+      upperLayerMazes = {
+        sizeX: lowerLayerMass[0][0].sizeX,
+        sizeY: lowerLayerMass[0][0].sizeY,
+        width: lowerLayerMass[0][0].width,
+        height: lowerLayerMass[0][0].height,
+        maps: []
+      }
+      for (var y = 0; y < h1; y++) {
+        upperLayerMazes.maps[y] = [];
+        for (var x = 0; x < w1; x++) {
+          upperLayerMazes.maps[y][x] = lowerLayerMass[y][x].map;
+        }
+      }
+      maze = createHierarchicalMaze(upperLayerMaze, upperLayerMazes);
+
+      // ラップして描画
+      maze = wrapMaze(maze.map);
+      drowMaze(maze, lineWidth);
+    }
+
+    // 迷路オブジェクトと迷路群オブジェクトから、階層迷路の迷路オブジェクトを生成
+    function createHierarchicalMaze (upperLayerMaze, lowerLayerMazes) {
+      var sizeX1 = upperLayerMaze.sizeX,
+        sizeY1 = upperLayerMaze.sizeY,
+        width1 = upperLayerMaze.width,
+        height1 = upperLayerMaze.height,
+        maze = upperLayerMaze.map,
+        sizeX2 = lowerLayerMazes.sizeX,
+        sizeY2 = lowerLayerMazes.sizeY,
+        width2 = lowerLayerMazes.width,
+        height2 = lowerLayerMazes.height,
+        mazes = lowerLayerMazes.maps,
+        width = sizeX1 * (width2 + 1) - 1,
+        height = sizeY1 * (height2 + 1) - 1,
+        hierarchicalMaze = [];
+
+      // 階層迷路の白地図生成、1マス余分に生成しておく
+      for (var y = 0; y <= height; y++) {
+        hierarchicalMaze[y] = [];
+        for (var x = 0; x <= width; x++) {
+          hierarchicalMaze[y][x] = 0;
+        }
+      }
+
+      // 迷路生成ループ
+      for (var y1 = 0; y1 < sizeY1; y1++) {
+        for (var x1 = 0; x1 < sizeX1; x1++) {
+          // 親迷路のX軸生成
+          if (y1 !== 0) {
+            for (var x2 = 0; x2 <= width2; x2++) {
+              hierarchicalMaze[y1 * (height2 + 1) - 1][x1 * (width2 + 1) + x2] = 1;
+            }
+            if (maze[y1 * 2 - 1][x1 * 2] === 0) {
+              var xr = Math.floor(Math.random() * (sizeX2 - 1)) * 2;
+              hierarchicalMaze[y1 * (height2 + 1) - 1][x1 * (width2 + 1) + xr] = 0;
+            }
+          }
+          
+          // 親迷路のY軸生成
+          if (x1 !== 0) {
+            for (var y2 = 0; y2 <= height2; y2++) {
+              hierarchicalMaze[y1 * (height2 + 1) + y2][x1 * (width2 + 1) - 1] = 1;
+            }
+            if (maze[y1 * 2][x1 * 2 - 1] === 0) {
+              var yr = Math.floor(Math.random() * (sizeY2 - 1)) * 2;
+              hierarchicalMaze[y1 * (height2 + 1) + yr][x1 * (width2 + 1) - 1] = 0;
+            }
+          }
+
+          // 子迷路を生成
+          for (var y2 = 0; y2 < height2; y2++) {
+            for (var x2 = 0; x2 < width2; x2++) {
+              hierarchicalMaze[y1 * (height2 + 1) + y2][x1 * (width2 + 1) + x2] = mazes[y1][x1][y2][x2];
+            }
+          }
+        }
+      }
+
+      return {
+        sizeX: (width + 1) / 2,
+        sizeY: (height + 1) / 2,
+        width: width,
+        height: height,
+        map: hierarchicalMaze
+      };
+    }
+
+    // 迷路オブジェクト生成
+    function createMazeObj (sizeX, sizeY) {
+      var width = sizeX * 2 -1,
+        height = sizeY * 2 -1;
+      return {
+        sizeX: sizeX,
+        sizeY: sizeY,
+        width: width,
+        height: height,
+        map: createMaze(width, height)
+      }
+    }
+
+    // 迷路群オブジェクト生成
+    function createMazesObj (sizeX1, sizeY1, sizeX2, sizeY2) {
+      var mazes = [],
+        width1 = sizeX1 * 2 - 1,
+        height1 = sizeY1 * 2 - 1,
+        width2 = sizeX2 * 2 - 1,
+        height2 = sizeY2 * 2 - 1;
+      for (var y = 0; y < height1; y++) {
+        mazes[y] = [];
+        for (var x = 0; x < width1; x++) {
+          mazes[y][x] = createMaze(width2, height2);
+        }
+      }
+      return {
+        sizeX: sizeX2,
+        sizeY: sizeY2,
+        width: width2,
+        height: height2,
+        maps: mazes
+      }
+    }
+
+    // 棒倒し法で迷路作成
+    function createMaze (w, h) {
+      var maze = [];
+
+      // 白地図生成
+      for (var y = 0; y < h; y++) {
+        maze[y] = [];
+        for (var x = 0; x < w; x++) {
+          maze[y][x] = 0;
+        }
+      }
+
+      // 柱を4方向のいずれかにランダムに倒す
+      for (var y = 1; y < h - 1; y += 2) {
+        for (var x = 1; x < w - 1; x += 2) {
+          maze[y][x] = 1 // 1マス間隔に柱
+          var isLoop = true;
+          while (isLoop) { 
+            var px = x, py = y,
+              dir = Math.floor(Math.random() * 4);
+            switch (dir) {
+              case 0: py++; break; // 下方向へ倒す
+              case 1: px--; break; // 左方向へ倒す
+              case 2: py--; break; // 上方向へ倒す
+              case 3: px++; break; // 右方向へ倒す 
+            }
+            if (maze[py][px] === 0) {
+              maze[py][px] = 1;
+              isLoop = false;
+            }
+          }
+        }
+      }
+
+      return maze;
+    }
+
+    // 迷路を壁で囲う
+    function wrapMaze (maze) {
+      var wrapped = [],
+        height = maze.length + 1,
+        width = maze[0].length + 1;
+      // 壁で囲う
+      for (var y = 0; y < height; y++) {
+        wrapped[y] = [];
+        for (var x = 0; x < width; x++) {
+          if (y === 0 || y === height - 1 || x === 0 || x === width - 1) {
+            wrapped[y][x] = 1;
+          } else {
+            wrapped[y][x] = maze[y - 1][x - 1];
+          }
+        }
+      }
+      // 始点、終点
+      wrapped[0][1] = 0;
+      wrapped[height - 1][width - 2] = 0;
+      return wrapped;
+    }
+
+    // 描画
+    function drowMaze (maze, lineWidth) {
+      var cnt = document.getElementById('maze').getContext('2d'),
+        h = maze.length,
+        w = maze[0].length;
+      cnt.clearRect(0, 0, WIDTH, HEIGHT);
+      cnt.fillStyle = "#999";
+      for (var y = 0; y < h; y++) {
+        for (var x = 0; x < w; x++) {
+          if (maze[y][x] === 1) {
+            cnt.fillRect(x * lineWidth, y * lineWidth, lineWidth, lineWidth);
+          }
+        }
+      }
+    }
+
+  </script>
+  <!-- InstanceEndEditable -->
+</body>
+
+<!-- InstanceEnd --></html>

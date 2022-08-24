@@ -1,0 +1,92 @@
+<!doctype html>
+<html><!-- InstanceBegin template="/Templates/master.dwt" codeOutsideHTMLIsLocked="false" -->
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- InstanceBeginEditable name="doctitle" -->
+  <title>Blackboard - JS Apps made by TG WEBCODING</title>
+  <!-- InstanceEndEditable -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.css">
+  <link rel="stylesheet" href="../style.css">
+  <!-- InstanceBeginEditable name="head" -->
+  <style>
+    #canvas-wrap {
+      width: 720px;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+    
+    #canvas {
+      max-width: 100%;
+      background: #030;
+    }
+  </style>
+  <!-- InstanceEndEditable -->
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-140782462-1', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+</head>
+
+<body>
+  <noscript>
+    <p class="no-support">このWebページはJavaScriptを有効にすることで正常に動作します。
+      <br>JavaScriptを有効にして再度ご来訪ください。</p>
+  </noscript>
+  <!-- InstanceBeginEditable name="body" -->
+  <div class="container my-5">
+    <h1>Blackboard</h1>
+    <p>JS Apps made by TG WEBCODING</p>
+    <div id="canvas-wrap">
+      <canvas id="canvas" width="720" height="480"></canvas>
+    </div>
+  </div>
+  <!-- InstanceEndEditable -->
+  <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+  <!-- InstanceBeginEditable name="foot" -->
+  <script>
+    var cnt,
+      points = [];
+
+    function init() {
+      var canvas = document.getElementById('canvas')
+      cnt = canvas.getContext('2d');
+      cnt.strokeStyle = "#fff";
+      canvas.onmousedown = mymousedown;
+      canvas.onmousemove = mymousemove;
+      canvas.onmouseup = mymouseup;
+    }
+
+    function mymousedown(e) {
+      points = [{ x: e.offsetX, y: e.offsetY }];
+    }
+
+    function mymousemove(e) {
+      if (points.length > 0) {
+        points.push({ x: e.offsetX, y: e.offsetY });
+        cnt.beginPath();
+        cnt.moveTo(points[0].x, points[0].y);
+        for (var i = 1; i < points.length; i++) {
+          cnt.lineTo(points[i].x, points[i].y);
+        }
+        cnt.stroke();
+      }
+    }
+
+    function mymouseup(e) {
+      points = [];
+    }
+
+    init();
+  </script>
+  <!-- InstanceEndEditable -->
+</body>
+
+<!-- InstanceEnd --></html>

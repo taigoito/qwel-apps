@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<body>
+  <div>
+    <select id="select" name="pen">
+      <option value="pencil">Pencil</option>
+      <option value="redPen">Red pen</option>
+    </select>
+  </div>
+  <div id="pen">
+    <div id="point"></div>
+    <div id="peak"></div>
+    <div id="handle"></div>
+  </div>
+  <script>
+    var pens = [
+      { // pencil
+        handleColor: 'green',
+        pointColor: 'gray'
+      },
+      { // redPen
+        handleColor: 'red',
+        pointColor: 'red'
+      }
+    ];
+    document.getElementById('pen').style.width = '480px';
+    document.getElementById('pen').style.transform = 'rotate(-30deg) translate(-90px, 120px)';
+    document.getElementById('handle').style.cssFloat = 'left';
+    document.getElementById('handle').style.background = 'green';
+    document.getElementById('handle').style.width = '10.8cm';
+    document.getElementById('handle').style.height = '6mm';
+    document.getElementById('handle').style.borderTopRightRadius = '1.5mm';
+    document.getElementById('handle').style.borderBottomRightRadius = '1.5mm';
+    document.getElementById('handle').style.boxShadow = '.5mm 1mm 1mm gray';
+    document.getElementById('peak').style.cssFloat = 'left';
+    document.getElementById('peak').style.width = 0;
+    document.getElementById('peak').style.height = '2mm';
+    document.getElementById('peak').style.borderTop = '2mm solid transparent';
+    document.getElementById('peak').style.borderRight = '12mm solid wheat';
+    document.getElementById('peak').style.borderBottom = '2mm solid transparent';
+    document.getElementById('point').style.cssFloat = 'left';
+    document.getElementById('point').style.width = 0;
+    document.getElementById('point').style.height = 0;
+    document.getElementById('point').style.marginTop = '2mm';
+    document.getElementById('point').style.borderTop = '1mm solid transparent';
+    document.getElementById('point').style.borderRight = '6mm solid gray';
+    document.getElementById('point').style.borderBottom = '1mm solid transparent';
+    document.getElementById('select').addEventListener('change', function(){
+      document.getElementById('handle').style.background = pens[this.selectedIndex].handleColor;
+      document.getElementById('point').style.borderRightColor = pens[this.selectedIndex].pointColor;
+    });
+  </script>
+</body>
+</html>

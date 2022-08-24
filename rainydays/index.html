@@ -1,0 +1,490 @@
+<!doctype html>
+<html><!-- InstanceBegin template="/Templates/master.dwt" codeOutsideHTMLIsLocked="false" -->
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- InstanceBeginEditable name="doctitle" -->
+  <title>Rainydays - JS Apps made by TG WEBCODING</title>
+  <!-- InstanceEndEditable -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.css">
+  <link rel="stylesheet" href="../style.css">
+  <!-- InstanceBeginEditable name="head" -->
+  <style>
+    body {
+      overflow: scroll;
+    }
+
+    #canvasWrap {
+      width: 576px;
+      height: 288px;
+      margin: auto;
+      background: #ffe;
+    }
+
+    #description {
+      padding: 12px;
+    }
+
+    #progressBtn {
+      display: block;
+      width: 120px;
+      height: 48px;
+      margin: 48px auto;
+    }
+
+    #tankCards {
+      height: 216px;
+      margin: 36px auto;
+      background: #cff;
+    }
+
+    #happyCards {
+      height: 216px;
+      margin: 36px auto;
+      background: #ffc;
+    }
+
+    #tankCards li,
+    #happyCards li {
+      height: 216px;
+      border: 2px solid #eee;
+      border-radius: 4px;
+    }
+
+    #tankCards li span,
+    #happyCards li span {
+      display: block;
+      width: 100%;
+      height: 18px;
+      line-height: 18px;
+      margin: 90px auto;
+      text-align: center;
+    }
+
+    #tankCards li:not(.active),
+    #happyCards li:not(.active) {
+      border: 2px solid #fff;
+      background-color: #eee;
+      color: #ccc;
+    }
+
+    #tankCards li.active:not(.fill) span:after {
+      display: block;
+      content: '空っぽ';
+    }
+
+    #tankCards li.active.fill {
+      background-color: #6cc;
+      color: #fff;
+    }
+
+    #tankCards li.active.fill span:after {
+      display: block;
+      content: '満タン';
+    }
+
+    #log {
+      width: 576px;
+      margin: auto;
+    }
+
+    .unit {
+      width: 576px;
+      margin-bottom: 12px;
+      padding: 12px;
+      background: #eff;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .inactive {
+      opacity: 0;
+    }
+  </style>
+  <!-- InstanceEndEditable -->
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-140782462-1', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+</head>
+
+<body>
+  <noscript>
+    <p class="no-support">このWebページはJavaScriptを有効にすることで正常に動作します。
+      <br>JavaScriptを有効にして再度ご来訪ください。</p>
+  </noscript>
+  <!-- InstanceBeginEditable name="body" -->
+  <div class="container my-5">
+    <h1>Rainy Days</h1>
+    <p>JS Apps made by TG WEBCODING</p>
+    <div class="row">
+      <div class="col-lg-8">
+        <div id="canvasWrap">
+          <!--<canvas id="canvas" width="576" height="288"></canvas>-->
+          <p id="description">QUERYボタンを押すと、天気・イベントサイコロを振ったことになります。
+            <br>RESULTボタンを押すと、結果が表示されます。
+            <br>ハッピーな結果のときは、「あめぐら！」と叫ばないとカードは貰えません。</p>
+          <button id="progressBtn" class="btn btn-info btn-lg" type="button">QUERY</button>
+        </div>
+      </div>
+      <div class="col-lg-4 text-center">
+        <h5>タンクカード</h5>
+        <ul id="tankCards" class="list-unstyled row">
+          <li id="tank_1" class="col-4">
+            <span>タンク1</span>
+          </li>
+          <li id="tank_2" class="col-4">
+            <span>タンク2</span>
+          </li>
+          <li id="tank_3" class="col-4">
+            <span>タンク3</span>
+          </li>
+        </ul>
+      </div>
+      <div class="col-lg-8">
+        <div id="log"></div>
+      </div>
+      <div class="col-lg-4 text-center">
+        <h5>ハッピーカード</h5>
+        <ul id="happyCards" class="list-unstyled row">
+          <li id="happy-aquashop" class="col-4">
+            <span>お魚を
+              <br>飼い始めた</span>
+          </li>
+          <li id="happy-gardenwork" class="col-4">
+            <span>野菜を
+              <br>収穫した</span>
+          </li>
+          <li id="happy-playing" class="col-4">
+            <span>思いっきり
+              <br>水遊びをした</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!-- InstanceEndEditable -->
+  <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+  <!-- InstanceBeginEditable name="foot" -->
+  <script>
+    var weatherArr = [
+      {
+        id: 1,
+        weatherTitle: '快晴',
+        watering: true,
+        fill: false,
+        flood: false,
+        play: true
+      },
+      {
+        id: 2,
+        weatherTitle: '晴',
+        watering: true,
+        ill: false,
+        flood: false,
+        play: true
+      },
+      {
+        id: 3,
+        weatherTitle: '曇',
+        watering: false,
+        ill: false,
+        flood: false,
+        play: false
+      },
+      {
+        id: 4,
+        weatherTitle: '小雨',
+        watering: false,
+        fill: true,
+        flood: false,
+        play: false
+      },
+      {
+        id: 5,
+        weatherTitle: '雨',
+        watering: false,
+        fill: true,
+        flood: false,
+        play: false
+      },
+      {
+        id: 6,
+        weatherTitle: '大雨',
+        watering: false,
+        fill: true,
+        flood: true,
+        play: false
+      }
+    ];
+
+    var eventArr = [
+      {
+        id: 1,
+        eventTitle: 'アクアショップに行くことにしました。',
+        eventContent: [
+          'お魚をたくさん見たけれど、特に買いませんでした。',
+          'お魚をたくさん見たけれど、特に買いませんでした。',
+          'お魚をたくさん見たけれど、特に買いませんでした。',
+          'お魚をたくさん見たけれど、特に買いませんでした。',
+          'お魚をたくさん見たけれど、特に買いませんでした。',
+          'お魚をたくさん見たけれど、特に買いませんでした。'
+        ],
+        set: false,
+        play: true,
+        tank: 1
+      },
+      {
+        id: 2,
+        eventTitle: '庭仕事をすることにしました。',
+        eventContent: [
+          '暑すぎて、仕事は捗りませんでした。',
+          'ちょうど良い天気で、仕事が捗りました。',
+          'ちょうど良い天気で、仕事が捗りました。',
+          '雨で、仕事は捗りませんでした。',
+          '雨で、仕事は捗りませんでした。',
+          '大雨で、全く仕事は捗りませんでした。'
+        ],
+        set: false,
+        play: false,
+        tank: 2
+      },
+      {
+        id: 3,
+        eventTitle: '庭仕事をすることにしました。',
+        eventContent: [
+          '暑すぎて、仕事は捗りませんでした。',
+          'ちょうど良い天気で、仕事が捗りました。',
+          'ちょうど良い天気で、仕事が捗りました。',
+          '雨で、仕事は捗りませんでした。',
+          '雨で、仕事は捗りませんでした。',
+          '大雨で、全く仕事は捗りませんでした。'
+        ],
+        set: false,
+        play: false,
+        tank: 2
+      },
+      {
+        id: 4,
+        eventTitle: '公園に行くことにしました。',
+        eventContent: [
+          '暑すぎて、楽しく遊べませんでした。',
+          'ちょうど良い天気で、楽しく遊べました。',
+          'ちょうど良い天気で、楽しく遊べました。',
+          '雨で、楽しく遊べませんでした。',
+          '雨で、楽しく遊べませんでした。',
+          '大雨で、全く楽しく遊べませんでした。'
+        ],
+        set: false,
+        play: false,
+        tank: 3
+      },
+      {
+        id: 5,
+        eventTitle: '貯水タンクを新しく作ろうかな？',
+        set: true,
+        play: false,
+        tank: 0
+      },
+      {
+        id: 6,
+        eventTitle: '貯水タンクを新しく作ろうかな？',
+        set: true,
+        play: false,
+        tank: 0
+      }
+    ];
+
+    var gameObj = {
+      result: false,
+      week: 0,
+      flood: 0,
+      weatherHistory: [],
+      eventHistory: [],
+      tanks: [],
+      isWatering: false,
+      isFill: false,
+      isSet: false,
+      happyAquashop: false,
+      happyGardenwork: false,
+      happyPlaying: false,
+      gameOver: false
+    };
+
+    function pass(num1, num2) {
+      var $div1 = $('<div class="unit">'),
+        $div2 = $('<div class="result inactive">');
+      gameObj.week++;
+      $div1.append('<p>第' + gameObj.week + '週目</p>');
+      gameObj.weatherHistory.unshift(num1);
+      $div1.append('<p>今日の天気は、「' + weatherArr[num1].weatherTitle + '」</p>');
+      gameObj.eventHistory.unshift(num2);
+      $div1.append('<p>' + eventArr[num2].eventTitle + '</p>');
+      progress($div2, num1, num2);
+      $div1.append($div2);
+      $('#log').prepend($div1);
+    }
+
+    function progress($div, num1, num2) {
+      console.log(gameObj);
+      var message = [];
+      //氾濫
+      if (weatherArr[num1].flood) {
+        gameObj.flood++;
+      } else {
+        gameObj.flood = 0;
+      }
+      //各種イベント
+      if (weatherArr[num1].watering) {
+        //晴れのとき
+        if (eventArr[num2].tank <= gameObj.tanks.length && gameObj.tanks[0] && weatherArr[num1].play) {
+          //ハッピー
+          gameObj.tanks.forEach(function (tank, index) {
+            gameObj.tanks[index] = false;
+          });
+          gameObj.isWatering = true;
+          switch (eventArr[num2].id) {
+            case 2:
+            case 3:
+              gameObj.happyGardenwork = true;
+              message.push('雨水タンクの水を庭に散布したおかげで、家庭菜園は大収穫です！！');
+              message.push('あめぐら！');
+              checkGameOver();
+              break;
+            case 4:
+              gameObj.happyPlaying = true;
+              message.push('雨水タンクの水を思いっ切り使って、水遊びを楽しみました！！');
+              message.push('あめぐら！');
+              checkGameOver();
+              break;
+            default:
+              message.push('晴れていたので、雨水タンクの水を散布しました。');
+              break;
+          }
+        } else if (0 < gameObj.tanks.length && gameObj.tanks[0]) {
+          //タンク有
+          gameObj.tanks.forEach(function (tank, index) {
+            gameObj.tanks[index] = false;
+          });
+          gameObj.isWatering = true;
+          message.push('晴れていたので、雨水タンクの水を散布しました。');
+        } else if (eventArr[num2].id !== 1 && !eventArr[num2].set) {
+          //タンク無
+          message.push(eventArr[num2].eventContent[num1]);
+        }
+      } else if (weatherArr[num1].fill) {
+        //雨のとき
+        if (0 < gameObj.tanks.length) {
+          //タンク有
+          gameObj.tanks.forEach(function (tank, index) {
+            gameObj.tanks[index] = true;
+          });
+          gameObj.isFill = true;
+          message.push('雨のおかげで、雨水タンクの水が満タンになりました。');
+        } else if (eventArr[num2].id !== 1 && !eventArr[num2].set) {
+          //タンク無
+          message.push(eventArr[num2].eventContent[num1]);
+        }
+      } else if (eventArr[num2].id !== 1 && !eventArr[num2].set) {
+        //曇りのとき
+        message.push(eventArr[num2].eventContent[num1]);
+      }
+      if (eventArr[num2].id === 1) {
+        //アクアショップ
+        if (eventArr[num2].tank <= gameObj.tanks.length && gameObj.tanks[0] && eventArr[num2].play) {
+          //ハッピー
+          gameObj.happyAquashop = true;
+          message.push('アクアショップでお魚を買いました。雨水タンクで飼うことにしましょう！');
+          message.push('あめぐら！');
+          checkGameOver();
+        } else {
+          message.push(eventArr[num2].eventContent[num1]);
+        }
+      }
+      if (eventArr[num2].set) {
+        //タンク制作
+        if (gameObj.tanks.length < 3) {
+          gameObj.tanks.push(false);
+          gameObj.isSet = true;
+          message.push('すてきな貯水タンクができあがりました。');
+        } else {
+          message.push('これ以上タンクは設置できませんね。');
+        }
+      }
+      //メッセージを挿入
+      message.forEach(function (txt) {
+        $div.prepend('<p>' + txt + '</p>');
+      })
+    }
+
+    function query() {
+      pass(Math.floor(Math.random() * 6), Math.floor(Math.random() * 6));
+      gameObj.result = true;
+      $('#progressBtn').text('RESULT');
+    }
+
+    function result() {
+      $('#log').find('.result').removeClass('inactive');
+      if (gameObj.isWatering) {
+        $('#tankCards').find('.active').each(function (index, el) {
+          $(el).removeClass('fill');
+        });
+        gameObj.isWatering = false;
+      }
+      if (gameObj.isFill) {
+        $('#tankCards').find('.active').each(function (index, el) {
+          $(el).addClass('fill');
+        });
+        gameObj.isFill = false;
+      }
+      if (gameObj.isSet) {
+        $('#tankCards').find('li').each(function (index, el) {
+          if (!$(el).hasClass('active') && gameObj.isSet) {
+            $(el).addClass('active');
+            gameObj.isSet = false;
+          }
+        });
+      }
+      if (gameObj.happyAquashop) {
+        $('#happy-aquashop').addClass('active');
+      }
+      if (gameObj.happyGardenwork) {
+        $('#happy-gardenwork').addClass('active');
+      }
+      if (gameObj.happyPlaying) {
+        $('#happy-playing').addClass('active');
+      }
+      if (gameObj.gameOver) {
+        $('#log').prepend('<p class="lead text-center">クリア！！</p>')
+      }
+
+      gameObj.result = false;
+      $('#progressBtn').text('QUERY');
+    }
+
+    function checkGameOver() {
+      if (gameObj.happyAquashop && gameObj.happyGardenwork && gameObj.happyPlaying) {
+        gameObj.gameOver = true;
+      }
+    }
+
+    $('#progressBtn').on('click', function () {
+      if (gameObj.result) {
+        result();
+      } else if (!gameObj.gameOver) {
+        query();
+      }
+    });
+
+  </script>
+  <!-- InstanceEndEditable -->
+</body>
+
+<!-- InstanceEnd --></html>
