@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- TemplateBeginEditable name="doctitle" -->
-  <title>JS Apps made by TG WEBCODING</title>
+  <title>JS Apps made by QWEL DESIGN</title>
   <!-- TemplateEndEditable -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.css">
   <link rel="stylesheet" href="../style.css">
@@ -31,7 +31,7 @@
   <!-- TemplateBeginEditable name="body" -->
   <div class="container my-5">
     <h1>(Title here)</h1>
-    <p>JS Apps made by TG WEBCODING</p>
+    <p>JS Apps made by QWEL DESIGN</p>
   </div>
   <!-- TemplateEndEditable -->
   <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
