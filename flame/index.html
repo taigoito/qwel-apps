@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flame - JS Apps made by QWEL DESIGN</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="icon" href="./favicon.ico">
+    <style>
+      #container {
+        width: 960px;
+        margin-inline: auto;
+      }
+
+      #canvas {
+        background-color: black;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <canvas id="canvas" width="960" height="480"></canvas>
+    </div>
+    <script>
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      const baseHue = 0;
+      const dynamics = 5;
+      const num = dynamics * 100;
+      const speed = dynamics;
+      const life = dynamics;
+      const pointX = [];
+      const pointY = [];
+      const pointVX = [];
+      const pointVY = [];
+      const pointAX = [];
+      const pointAY = [];
+      const pointFX = [];
+      const pointFY = [];
+      const pointMass = [];
+      const pointLife = [];
+      let forced = 1;
+      init();
+
+      function init() {
+        for (let i = 0; i < num; i++) {
+          pointX.push(Math.floor(Math.random() * w));
+          pointY.push(Math.floor(Math.random() * h));
+          pointVX.push(0);
+          pointVY.push(0);
+          pointAX.push(0);
+          pointAY.push(0);
+          pointFX.push(0);
+          pointFY.push(0);
+          pointMass.push(Math.sqrt(Math.floor(Math.random() * 10)));
+          pointLife.push(life);
+        }
+        requestAnimationFrame(force);
+      }
+
+      function force() {
+        for (let i = 0; i < num; i++) {
+          const bool = Math.floor(Math.random() * 100);
+          if (bool < 2) {
+            if (bool == 0) {
+              pointFX[i] = Math.sqrt(Math.floor(Math.random() * 10)) * speed * -0.05;
+            } else {
+              pointFX[i] = Math.sqrt(Math.floor(Math.random() * 10)) * speed * 0.05;
+            }
+            pointAX[i] = pointFX[i] / pointMass[i];
+          } else {
+            pointFX[i] = 0;
+            pointAX[i] = 0;
+          }
+          if (forced == 1) {
+            pointFY[i] = Math.sqrt(Math.floor(Math.random() * 10)) * speed * -1;
+            pointAY[i] = pointFY[i] / pointMass[i];
+          } else {
+            pointFY[i] = 0;
+            pointAY[i] = 0;
+          }
+        }
+        update();
+        requestAnimationFrame(force);
+      }
+
+      function update() {
+        forced = 0;
+        for (let i = 0; i < num; i++) {
+          pointVX[i] += pointAX[i];
+          pointVY[i] += pointAY[i];
+          pointX[i] += pointVX[i];
+          pointY[i] += pointVY[i];
+          if (pointX[i] < 0) pointX[i] = w;
+          if (w < pointX[i]) pointX[i] = 0;
+          if (pointY[i] < 0) {
+            pointY[i] = h;
+            pointLife[i] = life;
+          }
+          if (Math.random() < 0.1 && pointLife[i] > 1) {
+            for (let j = life; j >= 0; j--) {
+              if (pointY[i] < h * j / (life + 1)) pointLife[i] = j;
+            }
+          }
+        }
+        draw();
+      }
+
+      function draw() {
+        clear();
+        for (let i = 0; i < num; i++) {
+          ctx.beginPath();
+          ctx.arc(pointX[i], pointY[i], pointMass[i] * pointLife[i] / 5, 0, Math.PI * 2);
+          ctx.closePath();
+          ctx.fillStyle = `hsl(${baseHue + pointLife[i] * 5}, 100%, 50%)`;
+          ctx.fill();
+        }
+      }
+
+      function clear() {
+        ctx.clearRect(0, 0, w, h);
+        const backgroundGradient = ctx.createLinearGradient(0, 0, 0, h);
+        backgroundGradient.addColorStop(0, `hsl(${baseHue}, 0%, 0%)`);
+        backgroundGradient.addColorStop(1, `hsl(${baseHue}, 100%, 50%)`);
+        ctx.fillStyle = backgroundGradient;
+        ctx.fillRect(0, 0, w, h);
+      }
+
+    </script>
+  </body>
+</html>
